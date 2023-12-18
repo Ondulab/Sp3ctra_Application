@@ -18,6 +18,7 @@
 		367A52DB2AF4136C00FE94D7 /* libcsfml-system.2.5.2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 367A52D62AF4136C00FE94D7 /* libcsfml-system.2.5.2.dylib */; };
 		367A52DC2AF4136C00FE94D7 /* libcsfml-audio.2.5.2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 367A52D72AF4136C00FE94D7 /* libcsfml-audio.2.5.2.dylib */; };
 		367A52DD2AF4136C00FE94D7 /* libcsfml-graphics.2.5.2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 367A52D82AF4136C00FE94D7 /* libcsfml-graphics.2.5.2.dylib */; };
+		36B824CD2B30E5060012E587 /* multithreading.c in Sources */ = {isa = PBXBuildFile; fileRef = 36B824CC2B30E5060012E587 /* multithreading.c */; };
 		36EFD8362B2F00B300E6AB32 /* udp.c in Sources */ = {isa = PBXBuildFile; fileRef = 36EFD8352B2F00B300E6AB32 /* udp.c */; };
 		36EFD8392B2F00EA00E6AB32 /* shared.c in Sources */ = {isa = PBXBuildFile; fileRef = 36EFD8382B2F00EA00E6AB32 /* shared.c */; };
 		36EFD8412B2F01A300E6AB32 /* wave_generation.c in Sources */ = {isa = PBXBuildFile; fileRef = 36EFD8402B2F01A300E6AB32 /* wave_generation.c */; };
@@ -52,6 +53,9 @@
 		367A52D62AF4136C00FE94D7 /* libcsfml-system.2.5.2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libcsfml-system.2.5.2.dylib"; path = "../../../../../../opt/homebrew/Cellar/csfml/2.5.2_1/lib/libcsfml-system.2.5.2.dylib"; sourceTree = "<group>"; };
 		367A52D72AF4136C00FE94D7 /* libcsfml-audio.2.5.2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libcsfml-audio.2.5.2.dylib"; path = "../../../../../../opt/homebrew/Cellar/csfml/2.5.2_1/lib/libcsfml-audio.2.5.2.dylib"; sourceTree = "<group>"; };
 		367A52D82AF4136C00FE94D7 /* libcsfml-graphics.2.5.2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libcsfml-graphics.2.5.2.dylib"; path = "../../../../../../opt/homebrew/Cellar/csfml/2.5.2_1/lib/libcsfml-graphics.2.5.2.dylib"; sourceTree = "<group>"; };
+		36B824CB2B30E5060012E587 /* multithreading.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = multithreading.h; sourceTree = "<group>"; };
+		36B824CC2B30E5060012E587 /* multithreading.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = multithreading.c; sourceTree = "<group>"; };
+		36B824CE2B30EB940012E587 /* context.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = context.h; sourceTree = "<group>"; };
 		36EFD8332B2F008F00E6AB32 /* wave_generation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = wave_generation.h; sourceTree = "<group>"; };
 		36EFD8342B2F00B300E6AB32 /* udp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = udp.h; sourceTree = "<group>"; };
 		36EFD8352B2F00B300E6AB32 /* udp.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = udp.c; sourceTree = "<group>"; };
@@ -84,6 +88,7 @@
 		3626F7B72B2DE16D006F2267 /* Inc */ = {
 			isa = PBXGroup;
 			children = (
+				36B824CB2B30E5060012E587 /* multithreading.h */,
 				36EFD8422B2F02B900E6AB32 /* error.h */,
 				36EFD8342B2F00B300E6AB32 /* udp.h */,
 				36EFD8372B2F00EA00E6AB32 /* shared.h */,
@@ -92,6 +97,7 @@
 				3626F7CD2B2DEDBD006F2267 /* display.h */,
 				3626F7C72B2DE319006F2267 /* synth.h */,
 				36EFD83C2B2F017100E6AB32 /* config.h */,
+				36B824CE2B30EB940012E587 /* context.h */,
 			);
 			path = Inc;
 			sourceTree = "<group>";
@@ -99,6 +105,7 @@
 		3626F7B82B2DE176006F2267 /* Src */ = {
 			isa = PBXGroup;
 			children = (
+				36B824CC2B30E5060012E587 /* multithreading.c */,
 				36EFD8432B2F02B900E6AB32 /* error.c */,
 				3626F7C32B2DE303006F2267 /* synth.c */,
 				367A52C82AF123C500FE94D7 /* main.c */,
@@ -208,6 +215,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				36B824CD2B30E5060012E587 /* multithreading.c in Sources */,
 				3626F7D62B2E01A4006F2267 /* audio.c in Sources */,
 				3626F7CF2B2DEDBD006F2267 /* display.c in Sources */,
 				36EFD8442B2F02B900E6AB32 /* error.c in Sources */,

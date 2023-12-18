@@ -28,28 +28,81 @@
 #include "display.h"
 #include "udp.h"
 #include "audio.h"
-
+#include "multithreading.h"
+#include "context.h"
 
 //#define CALIBRATION
 //#define SSS_MOD_MODE
 
-int main_loop(sfRenderWindow *window, int s, struct sockaddr_in *si_other, struct sockaddr_in *si_me) {
-    ssize_t recv_len;
-    uint32_t buf[UDP_PACKET_SIZE];
-    int32_t image_buff[CIS_PIXELS_NB];
-    static uint32_t curr_packet = 0, curr_packet_header = 0;
-    unsigned int slen = sizeof(*si_other);
-    static int iteration_count = 0; // Ajout d'une variable de comptage
+int main(void) {
+    // Initialisation CSFML
+    sfVideoMode mode = {WINDOWS_WIDTH, WINDOWS_HEIGHT, 32};
+    sfRenderWindow *window = sfRenderWindow_create(mode, "CSFML Viewer", sfResize | sfClose, NULL);
+    if (!window) {
+        perror("Erreur de création de fenêtre CSFML");
+        return EXIT_FAILURE; // Assurez-vous que la fenêtre est créée
+    }
 
-    sfTexture* background_texture = sfTexture_create(WINDOWS_WIDTH, WINDOWS_HEIGHT);
-    sfTexture* foreground_texture = sfTexture_create(WINDOWS_WIDTH, WINDOWS_HEIGHT);
-    sfSprite* background_sprite = sfSprite_create();
-    sfSprite* foreground_sprite = sfSprite_create();
-    sfSprite_setTexture(background_sprite, background_texture, sfTrue);
-    sfSprite_setTexture(foreground_sprite, foreground_texture, sfTrue);
+    // Initialisation UDP et Audio
+    struct sockaddr_in si_other, si_me;
+    
+    AudioData audioData;
+    initAudioData(&audioData, AUDIO_CHANNEL, AUDIO_BUFFER_SIZE);
+    audio_Init(&audioData);
+    synth_IfftInit();
+    display_Init(window);
 
-    while (sfRenderWindow_isOpen(window)) 
-    {
+    int s = udp_Init(&si_other, &si_me);
+    if (s < 0) {
+        perror("Erreur d'initialisation UDP");
+        // Libération des ressources allouées précédemment
+        sfRenderWindow_destroy(window);
+        return EXIT_FAILURE;
+    }
+
+    OSStatus status = startAudioUnit();  // Assurez-vous de gérer ce status
+
+    // Création des threads et des structures de contexte
+    DoubleBuffer db;
+    initDoubleBuffer(&db);
+
+    Context context = {
+        .window = window,
+        .socket = s,
+        .si_other = &si_other,
+        .si_me = &si_me,
+        .audioData = &audioData,
+        .doubleBuffer = &db,
+        // ... Autres initialisations
+    };
+
+    pthread_t udpThreadId, imageThreadId, audioThreadId;
+
+    if (pthread_create(&udpThreadId, NULL, udpThread, (void *)&context) != 0) {
+        perror("Erreur de création du thread UDP");
+        // Nettoyage des ressources
+        sfRenderWindow_destroy(window);
+        // Autres nettoyages nécessaires
+        return EXIT_FAILURE;
+    }
+    if (pthread_create(&imageThreadId, NULL, imageProcessingThread, (void *)&context) != 0) {
+        perror("Erreur de création du thread UDP");
+        // Nettoyage des ressources
+        sfRenderWindow_destroy(window);
+        // Autres nettoyages nécessaires
+        return EXIT_FAILURE;
+    }
+    if (pthread_create(&audioThreadId, NULL, audioProcessingThread, (void *)&context) != 0) {
+        perror("Erreur de création du thread UDP");
+        // Nettoyage des ressources
+        sfRenderWindow_destroy(window);
+        // Autres nettoyages nécessaires
+        return EXIT_FAILURE;
+    }
+
+    // Boucle principale de rendu CSFML
+    while (sfRenderWindow_isOpen(window)) {
+        // Gestion des événements et rendu
         sfEvent event;
         while (sfRenderWindow_pollEvent(window, &event)) {
             if (event.type == sfEvtClosed) {
@@ -57,61 +110,19 @@ int main_loop(sfRenderWindow *window, int s, struct sockaddr_in *si_other, struc
             }
         }
 
-        for (curr_packet = 0; curr_packet < UDP_NB_PACKET_PER_LINE; curr_packet++) {
-            if ((recv_len = recvfrom(s, (uint8_t*)buf, UDP_PACKET_SIZE * sizeof(int32_t), 0, (struct sockaddr *)si_other, &slen)) == -1) {
-                die("recvfrom()");
-            }
-            curr_packet_header = buf[0];
-            memcpy(&image_buff[curr_packet_header], &buf[1], recv_len - (UDP_HEADER_SIZE * sizeof(int32_t)));
+        // Rendu avec CSFML (à adapter selon les besoins)
+        // ...
 
-#ifdef SSS_MOD_MODE
-            for (int idx = NUMBER_OF_NOTES; --idx >= 0;) {
-                image_audio_buff[idx] = greyScale(image_buff[(idx * PIXELS_PER_NOTE)]);
-            }
-#endif
-        }
-
-        printImage(window, image_buff, background_texture, foreground_texture);
-        
-        if (iteration_count % 10 == 0) { // Exécution tous les dix itérations
-            synth_AudioProcess(image_buff, audio_samples);
-        }
-        
-        iteration_count++; // Incrémentation du compteur
+        //sfRenderWindow_display(window);
     }
-    
-    sfSprite_destroy(background_sprite);
-    sfSprite_destroy(foreground_sprite);
-    sfTexture_destroy(background_texture);
-    sfTexture_destroy(foreground_texture);
-    sfRenderWindow_destroy(window);
-    
-    return 0;
-}
 
-
-int main(void)
-{
-    // Initialisation de CSFML
-    sfVideoMode mode = {WINDOWS_WIDTH, WINDOWS_HEIGHT, 32};
-    sfRenderWindow* window = sfRenderWindow_create(mode, "CSFML Viewer", sfResize | sfClose, NULL);
-    struct sockaddr_in si_other;
-    struct sockaddr_in si_me;
-    
-    AudioData audioData;
-    initAudioData(&audioData, AUDIO_CHANNEL, AUDIO_BUFFER_SIZE);
-    audio_Init(&audioData);
-    synth_IfftInit();
-    display_Init(window);
-    int s = udp_Init(&si_other, &si_me);
-
-    // Démarrer l'Audio Unit
-    OSStatus status = startAudioUnit();
-
-    
-    main_loop(window, s, &si_other, &si_me);
-    
+    // Nettoyage et fermeture
+    pthread_join(udpThreadId, NULL);
+    pthread_join(imageThreadId, NULL);
+    pthread_join(audioThreadId, NULL);
     audio_Cleanup();
     cleanupAudioData(&audioData);
+    sfRenderWindow_destroy(window);
+    
     return 0;
 }
