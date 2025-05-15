@@ -71,7 +71,9 @@ macx {
         -lcairo \
         -lsndfile \
         -L/opt/homebrew/Cellar/sfml@2/2.6.2_1/lib \
-        -lsfml-graphics -lsfml-window -lsfml-system \
+        /opt/homebrew/Cellar/sfml@2/2.6.2_1/lib/libsfml-graphics.2.6.dylib \
+        /opt/homebrew/Cellar/sfml@2/2.6.2_1/lib/libsfml-window.2.6.dylib \
+        /opt/homebrew/Cellar/sfml@2/2.6.2_1/lib/libsfml-system.2.6.dylib \
         -lcsfml-graphics -lcsfml-window -lcsfml-system
     
     # Chemins d'inclusion pour Homebrew

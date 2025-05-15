@@ -2,6 +2,11 @@
 #include <QOpenGLContext>
 #include <QOpenGLShaderProgram>
 
+// Inclure config.h pour accéder à WINDOWS_HEIGHT
+extern "C" {
+#include "core/config.h"
+}
+
 AudioVisualizer::AudioVisualizer(QWidget *parent)
     : QOpenGLWidget(parent), m_dataSize(0), m_dataUpdated(false) {
   // Activer le suivi de la souris
@@ -77,8 +82,8 @@ void AudioVisualizer::initializeGL() {
   // qui peuvent causer l'effet de trame visible
   glDisable(GL_BLEND);
 
-  // Initialiser les structures pour l'historique
-  m_historySize = 600; // Hauteur approximative de la fenêtre
+  // Initialiser les structures pour l'historique avec plus de hauteur
+  m_historySize = WINDOWS_HEIGHT; // Utiliser la hauteur définie dans config.h
   m_historyR.clear();
   m_historyG.clear();
   m_historyB.clear();
